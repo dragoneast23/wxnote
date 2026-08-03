@@ -21,7 +21,8 @@ export async function onRequestPost({ request, env }) {
 
   // 首次登录初始化
   if (admin.password_hash === 'INIT_PLACEHOLDER') {
-    const defaultPwd = env.ADMIN_DEFAULT_PASSWORD || 'wjl403224736';
+    const defaultPwd = env.ADMIN_DEFAULT_PASSWORD;
+    if (!defaultPwd) return fail('服务端未配置 ADMIN_DEFAULT_PASSWORD，请在 Pages Dashboard 环境变量中设置');
     const hash = await bcrypt.hash(defaultPwd, 10);
     await db.prepare(
       'UPDATE registers_admin SET password_hash = ?, updated_at = datetime(\'now\', \'localtime\') WHERE id = ?'

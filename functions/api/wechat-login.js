@@ -14,9 +14,8 @@ export async function onRequestPost({ request, env }) {
   const appid = env.WX_APPID;
   const secret = env.WX_SECRET;
 
-  if (!appid || !secret) {
-    return fail('服务端未配置微信 appid/secret');
-  }
+  if (!appid) return fail('服务端未配置 WX_APPID，请在 Pages Dashboard 环境变量中设置');
+  if (!secret) return fail('服务端未配置 WX_SECRET，请在 Pages Dashboard 环境变量 Secret 中设置');
 
   // 调用微信 code2session 接口
   const url = `https://api.weixin.qq.com/sns/jscode2session?appid=${appid}&secret=${secret}&js_code=${encodeURIComponent(code)}&grant_type=authorization_code`;

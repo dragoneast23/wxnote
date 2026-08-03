@@ -29,7 +29,8 @@ export async function onRequestPost({ request, env }) {
   const target = await db.prepare('SELECT id FROM users WHERE username = ?').bind(username).first();
   if (!target) return fail('用户不存在');
 
-  const newPwd = env.RESET_DEFAULT_PASSWORD || '12345678';
+  const newPwd = env.RESET_DEFAULT_PASSWORD;
+  if (!newPwd) return fail('服务端未配置 RESET_DEFAULT_PASSWORD，请在 Pages Dashboard 环境变量中设置');
   const newHash = await bcrypt.hash(newPwd, 10);
   await db.prepare('UPDATE users SET password = ? WHERE username = ?').bind(newHash, username).run();
 
