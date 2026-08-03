@@ -1,0 +1,19 @@
+{
+  "name": "wxnote",
+  "version": "1.0.0",
+  "private": true,
+  "description": "个人备忘录小程序后端 - Cloudflare Pages Functions + D1",
+  "scripts": {
+    "dev": "wrangler pages dev public --local --d1 DB=wxnote",
+    "deploy": "wrangler pages deploy public",
+    "db:init": "wrangler d1 execute wxnote --local --file=./schema.sql",
+    "db:init:remote": "wrangler d1 execute wxnote --remote --file=./schema.sql",
+    "db:create": "wrangler d1 create wxnote"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "wrangler": "^3.78.0"
+  }
+}

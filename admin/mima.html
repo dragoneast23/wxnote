@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户密码重置管理 - wxnote</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #7C3AED;
+            --primary-hover: #6D28D9;
+            --secondary: #A78BFA;
+            --cta: #F97316;
+            --cta-hover: #EA580C;
+            --bg: #FAF5FF;
+            --bg-card: #FFFFFF;
+            --text: #4C1D95;
+            --text-muted: #7C3AED;
+            --border: #E9D5FF;
+            --border-hover: #C4B5FD;
+            --success: #10B981;
+            --error: #EF4444;
+            --shadow: 0 4px 6px -1px rgba(124,58,237,0.1), 0 2px 4px -1px rgba(124,58,237,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(124,58,237,0.1), 0 4px 6px -2px rgba(124,58,237,0.05);
+            --shadow-card: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body {
+            font-family: 'Fira Sans', 'Microsoft Yahei', sans-serif;
+            background: linear-gradient(135deg, var(--bg) 0%, #F3E8FF 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 2.5rem; }
+        .header h1 { font-size: 1.8rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
+        .header h1 i { color: var(--primary); }
+        .header p { color: var(--text-muted); font-size: 0.95rem; }
+        .card { background: var(--bg-card); border-radius: 1rem; box-shadow: var(--shadow-card); border: 1px solid var(--border); padding: 2rem; margin-bottom: 1.5rem; transition: var(--transition); }
+        .card:hover { box-shadow: var(--shadow); border-color: var(--border-hover); }
+        .card-title { font-size: 1.25rem; font-weight: 600; color: var(--text); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--border); }
+        .card-title i { color: var(--primary); }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-label { display: block; font-weight: 500; color: var(--text); margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .form-input { width: 100%; max-width: 400px; padding: 0.875rem 1rem; border: 2px solid var(--border); border-radius: 0.75rem; font-size: 1rem; transition: var(--transition); background: #FAFAFA; color: var(--text); }
+        .form-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); background: #FFFFFF; }
+        .btn { padding: 0.875rem 2rem; border: none; border-radius: 0.75rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: #FFFFFF; }
+        .btn-primary:hover { background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary) 100%); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+        .btn-danger { background: linear-gradient(135deg, var(--cta) 0%, #FB923C 100%); color: #FFFFFF; }
+        .btn-danger:hover { background: linear-gradient(135deg, var(--cta-hover) 0%, var(--cta) 100%); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+        .btn-danger:disabled { background: #D1D5DB; cursor: not-allowed; transform: none; opacity: 0.6; }
+        .btn-secondary { background: #F3F4F6; color: var(--text); }
+        .btn-secondary:hover { background: #E5E7EB; }
+        .btn-sm { padding: 0.5rem 1rem; font-size: 0.875rem; }
+        .message { padding: 1rem 1.25rem; border-radius: 0.75rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; animation: slideIn 0.3s ease-out; }
+        .message.success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: var(--success); }
+        .message.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--error); }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .table-wrapper { overflow-x: auto; border-radius: 0.75rem; border: 1px solid var(--border); margin-top: 1rem; }
+        .data-table { width: 100%; border-collapse: collapse; background: var(--bg-card); }
+        .data-table thead { background: linear-gradient(135deg, var(--bg) 0%, #F3E8FF 100%); }
+        .data-table th { padding: 1rem; text-align: left; font-weight: 600; color: var(--text); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--border); }
+        .data-table td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; color: var(--text); }
+        .data-table tbody tr { transition: var(--transition); }
+        .data-table tbody tr:hover { background: rgba(124,58,237,0.02); }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+        .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .badge-empty { background: #FEF3C7; color: #D97706; }
+        .badge-active { background: #DBEAFE; color: #2563EB; }
+        .mask { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000; }
+        .mask.show { display: block; }
+        .dialog { width: 90%; max-width: 420px; background: var(--bg-card); border-radius: 1rem; box-shadow: var(--shadow-lg); margin: 100px auto; padding: 2rem; border: 1px solid var(--border); animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .dialog-title { font-size: 1.25rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .dialog-title i { color: var(--cta); }
+        .dialog p { margin-bottom: 0.75rem; font-size: 0.95rem; }
+        .dialog p strong { color: var(--cta); }
+        .dialog p span { font-family: 'Fira Code', monospace; background: var(--bg); padding: 0.25rem 0.5rem; border-radius: 0.375rem; color: var(--primary); }
+        .dialog-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+        .dialog-actions .btn { flex: 1; justify-content: center; }
+        .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+        .empty-state i { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
+        .stats-bar { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card { flex: 1; min-width: 140px; background: linear-gradient(135deg, var(--bg-card) 0%, #FDF4FF 100%); border-radius: 0.75rem; padding: 1rem 1.25rem; border: 1px solid var(--border); text-align: center; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); font-family: 'Fira Code', monospace; }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+        .back-link { display: inline-block; margin-bottom: 1rem; color: var(--text-muted); text-decoration: none; font-size: 0.875rem; }
+        .back-link:hover { color: var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa fa-lock"></i>个人备忘录用户密码重置管理</h1>
+            <p>安全管理小程序用户账号密码，支持一键重置</p>
+        </div>
+
+        <div id="msgBox"></div>
+
+        <div id="loginCard" class="card">
+            <div class="card-title"><i class="fa fa-shield"></i>管理员验证</div>
+            <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">使用 wxnote 管理员账号登录后可重置用户密码</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">管理员用户名</label>
+                    <input type="text" name="username" class="form-input" placeholder="请输入管理员用户名" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">管理员密码</label>
+                    <input type="password" name="password" class="form-input" placeholder="请输入管理员密码" required>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fa fa-sign-in"></i>登录</button>
+            </form>
+        </div>
+
+        <div id="mainCard" style="display: none;">
+            <a href="index.html" class="back-link"><i class="fa fa-arrow-left"></i> 返回管理后台</a>
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                <button id="logoutBtn" class="btn btn-secondary btn-sm"><i class="fa fa-sign-out"></i>退出登录</button>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-value" id="userCount">0</div>
+                    <div class="stat-label">总用户数</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fa fa-users"></i>全部用户列表 <span style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted); margin-left: auto;">空白账号禁止重置密码</span></div>
+                <div id="userList"></div>
+            </div>
+        </div>
+
+        <!-- 重置确认对话框 -->
+        <div id="mask" class="mask">
+            <div class="dialog">
+                <div class="dialog-title"><i class="fa fa-warning"></i>密码重置确认</div>
+                <p>即将重置账号：<span id="showTarget"></span></p>
+                <p>重置后密码统一为：<strong>12345678</strong></p>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">请确保用户已知晓此操作</p>
+                <form id="resetForm">
+                    <input type="hidden" name="username" id="targetUsername">
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label class="form-label">再次输入管理员密码确认</label>
+                        <input type="password" name="admin_password" class="form-input" placeholder="请输入管理员密码" required>
+                    </div>
+                    <div class="dialog-actions">
+                        <button type="button" id="cancelResetBtn" class="btn btn-secondary"><i class="fa fa-times"></i>取消</button>
+                        <button type="submit" class="btn btn-danger"><i class="fa fa-check"></i>确认重置</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = '/api/admin';
+        let currentTarget = '';
+
+        function showMsg(text, type) {
+            const box = document.getElementById('msgBox');
+            if (!text) { box.innerHTML = ''; return; }
+            box.innerHTML = `<div class="message ${type}"><i class="fa ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i><span>${escapeHtml(text)}</span></div>`;
+            setTimeout(() => box.innerHTML = '', 4000);
+        }
+
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        async function api(path, options = {}) {
+            const opts = { credentials: 'same-origin', headers: {}, ...options };
+            if (opts.body && typeof opts.body === 'object') {
+                opts.headers['Content-Type'] = 'application/json';
+                opts.body = JSON.stringify(opts.body);
+            }
+            const r = await fetch(API + path, opts);
+            return await r.json().catch(() => ({ code: -1, msg: '响应解析失败' }));
+        }
+
+        // 登录表单
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            const data = await api('/login', {
+                method: 'POST',
+                body: { username: fd.get('username'), password: fd.get('password') }
+            });
+            if (data.code === 0) {
+                showMsg('登录成功', 'success');
+                enterMain();
+            } else {
+                showMsg(data.msg || '登录失败', 'error');
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await api('/logout', { method: 'POST' });
+            document.getElementById('mainCard').style.display = 'none';
+            document.getElementById('loginCard').style.display = 'block';
+            showMsg('已退出登录', 'success');
+        });
+
+        async function enterMain() {
+            document.getElementById('loginCard').style.display = 'none';
+            document.getElementById('mainCard').style.display = 'block';
+            await loadUsers();
+        }
+
+        async function loadUsers() {
+            const data = await api('/users');
+            if (data.code !== 0) {
+                if (data.code === 401) {
+                    document.getElementById('mainCard').style.display = 'none';
+                    document.getElementById('loginCard').style.display = 'block';
+                    return;
+                }
+                document.getElementById('userList').innerHTML = `<div class="empty-state"><i class="fa fa-exclamation-triangle"></i><p>${escapeHtml(data.msg)}</p></div>`;
+                return;
+            }
+            const users = data.data || [];
+            document.getElementById('userCount').textContent = users.length;
+
+            if (users.length === 0) {
+                document.getElementById('userList').innerHTML = `<div class="empty-state"><i class="fa fa-inbox"></i><p>暂无用户数据</p></div>`;
+                return;
+            }
+
+            let rows = users.map(u => {
+                const uname = (u.username || '').trim();
+                const isEmpty = uname === '';
+                return `
+                    <tr>
+                        <td><code style="font-family:'Fira Code',monospace;background:var(--bg);padding:0.25rem 0.5rem;border-radius:0.375rem;font-size:0.8rem;">${u.id}</code></td>
+                        <td>${escapeHtml(u.username || '(空)')}</td>
+                        <td>${escapeHtml(u.nickname || '无')}</td>
+                        <td style="font-family:'Fira Code',monospace;font-size:0.8rem;">${escapeHtml(u.register_time || '')}</td>
+                        <td><span class="badge ${isEmpty ? 'badge-empty' : 'badge-active'}">${isEmpty ? '空白账号' : '正常'}</span></td>
+                        <td>${isEmpty
+                            ? '<button class="btn btn-danger btn-sm" disabled><i class="fa fa-ban"></i> 不可重置</button>'
+                            : `<button class="btn btn-danger btn-sm" onclick="openDialog('${escapeHtml(u.username)}')"><i class="fa fa-refresh"></i> 重置密码</button>`
+                        }</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('userList').innerHTML = `
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>账号(username)</th>
+                                <th>昵称</th>
+                                <th>注册时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        window.openDialog = function(username) {
+            currentTarget = username;
+            document.getElementById('mask').classList.add('show');
+            document.getElementById('showTarget').textContent = username;
+            document.getElementById('targetUsername').value = username;
+        };
+
+        document.getElementById('cancelResetBtn').addEventListener('click', () => {
+            document.getElementById('mask').classList.remove('show');
+            document.getElementById('resetForm').reset();
+        });
+
+        document.getElementById('mask').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('mask')) {
+                document.getElementById('mask').classList.remove('show');
+            }
+        });
+
+        document.getElementById('resetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentTarget || currentTarget.trim() === '') {
+                alert('账号为空，禁止执行重置操作！');
+                return;
+            }
+            const fd = new FormData(e.target);
+            const data = await api('/reset-password', {
+                method: 'POST',
+                body: {
+                    username: fd.get('username'),
+                    admin_password: fd.get('admin_password')
+                }
+            });
+            if (data.code === 0) {
+                showMsg(`重置成功！账号：${currentTarget}，新明文密码：${data.data.newPassword}`, 'success');
+                document.getElementById('mask').classList.remove('show');
+                document.getElementById('resetForm').reset();
+            } else {
+                showMsg(data.msg || '重置失败', 'error');
+                document.getElementById('mask').classList.remove('show');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('mask').classList.remove('show');
+            }
+        });
+
+        // 启动：检查登录状态
+        (async () => {
+            const data = await api('/users');
+            if (data.code === 0) {
+                enterMain();
+            } else {
+                document.getElementById('loginCard').style.display = 'block';
+                document.getElementById('mainCard').style.display = 'none';
+            }
+        })();
+    </script>
+</body>
+</html>

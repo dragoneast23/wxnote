@@ -1,0 +1,19 @@
+# 依赖
+node_modules/
+
+# Wrangler 本地数据
+.wrangler/
+.dev.vars
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 日志
+*.log

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>wxnote 管理后台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#0FC6C2',
+                        dark: '#1D2939',
+                        light: '#F9FAFB',
+                        accent: '#7B61FF'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .hover-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(22,93,255,0.3); }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-dark to-gray-800 text-light min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-3xl w-full">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-primary mb-3">
+                <i class="fa fa-shield mr-2"></i>wxnote 管理后台
+            </h1>
+            <p class="text-gray-400">个人备忘录小程序管理控制台</p>
+        </header>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <a href="zcm.html" class="bg-glass bg-white/5 backdrop-blur rounded-xl p-8 border border-gray-700/30 hover-lift block">
+                <div class="text-center">
+                    <i class="fa fa-database text-5xl text-secondary mb-4"></i>
+                    <h2 class="text-xl font-semibold text-primary mb-2">注册码管理</h2>
+                    <p class="text-gray-400 text-sm">生成、查看、删除用户注册码</p>
+                </div>
+            </a>
+            <a href="mima.html" class="bg-glass bg-white/5 backdrop-blur rounded-xl p-8 border border-gray-700/30 hover-lift block">
+                <div class="text-center">
+                    <i class="fa fa-key text-5xl text-secondary mb-4"></i>
+                    <h2 class="text-xl font-semibold text-primary mb-2">用户密码重置</h2>
+                    <p class="text-gray-400 text-sm">查看用户列表，重置用户密码</p>
+                </div>
+            </a>
+        </div>
+
+        <footer class="text-center text-gray-500 text-sm mt-10">
+            <p>wxnote 管理后台 &copy; 2026</p>
+        </footer>
+    </div>
+</body>
+</html>
