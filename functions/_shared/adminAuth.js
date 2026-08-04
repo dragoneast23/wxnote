@@ -2,6 +2,7 @@
 // 通过 Cookie 中的 admin_token 鉴权（管理后台用浏览器访问，Cookie 合适）
 import { unauthorized } from './response.js';
 import { generateToken, tokenExpireString } from './auth.js';
+import { formatShanghaiDate } from './db.js';
 
 /**
  * 通过 Cookie 获取当前管理员
@@ -15,11 +16,13 @@ export async function getAdminByCookie(request, db) {
   const token = match ? match[1] : '';
   if (!token) return unauthorized('未登录');
 
+  // 用上海时区时间比较
+  const now = formatShanghaiDate(new Date());
   const admin = await db.prepare(
     `SELECT id, username
      FROM registers_admin
-     WHERE token = ? AND token_expire > datetime('now', 'localtime')`
-  ).bind(token).first();
+     WHERE token = ? AND token_expire > ?`
+  ).bind(token, now).first();
 
   if (!admin) return unauthorized('登录已过期');
   return { admin };

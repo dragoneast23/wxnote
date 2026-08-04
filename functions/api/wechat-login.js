@@ -3,6 +3,7 @@
 // body: { code, nickname, registercode }
 import { parseBody, ok, fail } from '../_shared/response.js';
 import { generateToken, tokenExpireString } from '../_shared/auth.js';
+import { nowString } from '../_shared/db.js';
 
 export async function onRequestPost({ request, env }) {
   const { code, nickname, registercode } = await parseBody(request);
@@ -47,11 +48,11 @@ export async function onRequestPost({ request, env }) {
     ).bind(registercode).first();
     if (!codeRow) return fail('注册码不正确');
 
-    // 插入新用户
+    // 插入新用户（用上海时区时间）
     const ins = await db.prepare(
       `INSERT INTO users (openid, nickname, register_time)
-       VALUES (?, ?, datetime('now', 'localtime'))`
-    ).bind(openid, nickname).run();
+       VALUES (?, ?, ?)`
+    ).bind(openid, nickname, nowString()).run();
     userId = ins.meta.last_row_id;
 
     // 删除用过的注册码

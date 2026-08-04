@@ -3,6 +3,7 @@
 // body: { current_password, new_password, confirm_password }
 import { parseBody, ok, fail } from '../../_shared/response.js';
 import { getAdminByCookie, clearAdminCookie } from '../../_shared/adminAuth.js';
+import { nowString } from '../../_shared/db.js';
 import bcrypt from 'bcryptjs';
 
 export async function onRequestPost({ request, env }) {
@@ -24,8 +25,8 @@ export async function onRequestPost({ request, env }) {
 
   const newHash = await bcrypt.hash(new_password, 10);
   await db.prepare(
-    'UPDATE registers_admin SET password_hash = ?, updated_at = datetime(\'now\', \'localtime\'), token = NULL, token_expire = NULL WHERE id = ?'
-  ).bind(newHash, auth.admin.id).run();
+    'UPDATE registers_admin SET password_hash = ?, updated_at = ?, token = NULL, token_expire = NULL WHERE id = ?'
+  ).bind(newHash, nowString(), auth.admin.id).run();
 
   // 修改密码后自动登出
   const resp = ok('密码修改成功，请使用新密码重新登录');

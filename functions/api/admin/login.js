@@ -6,6 +6,7 @@
 // 用 env.ADMIN_DEFAULT_PASSWORD 生成真实 bcrypt 哈希并写入。
 import { parseBody, ok, fail } from '../../_shared/response.js';
 import { setAdminLogin, withAdminCookie } from '../../_shared/adminAuth.js';
+import { nowString } from '../../_shared/db.js';
 import bcrypt from 'bcryptjs';
 
 export async function onRequestPost({ request, env }) {
@@ -25,8 +26,8 @@ export async function onRequestPost({ request, env }) {
     if (!defaultPwd) return fail('服务端未配置 ADMIN_DEFAULT_PASSWORD，请在 Pages Dashboard 环境变量中设置');
     const hash = await bcrypt.hash(defaultPwd, 10);
     await db.prepare(
-      'UPDATE registers_admin SET password_hash = ?, updated_at = datetime(\'now\', \'localtime\') WHERE id = ?'
-    ).bind(hash, admin.id).run();
+      'UPDATE registers_admin SET password_hash = ?, updated_at = ? WHERE id = ?'
+    ).bind(hash, nowString(), admin.id).run();
     admin.password_hash = hash;
   }
 

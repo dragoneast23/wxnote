@@ -2,6 +2,7 @@
 // POST /api/register
 // body: { username, password, registercode }
 import { parseBody, ok, fail } from '../_shared/response.js';
+import { nowString } from '../_shared/db.js';
 import bcrypt from 'bcryptjs';
 
 export async function onRequestPost({ request, env }) {
@@ -24,11 +25,11 @@ export async function onRequestPost({ request, env }) {
   // 加密密码（bcrypt，与 PHP password_hash 兼容）
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // 插入用户
+  // 插入用户（用上海时区时间）
   const result = await db.prepare(
     `INSERT INTO users (username, password, nickname, register_time)
-     VALUES (?, ?, ?, datetime('now', 'localtime'))`
-  ).bind(username, hashedPassword, username).run();
+     VALUES (?, ?, ?, ?)`
+  ).bind(username, hashedPassword, username, nowString()).run();
 
   const userId = result.meta.last_row_id;
 

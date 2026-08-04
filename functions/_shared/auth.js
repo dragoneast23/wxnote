@@ -1,6 +1,7 @@
 // Token 验证与用户身份解析
 
 import { unauthorized } from './response.js';
+import { formatShanghaiDate } from './db.js';
 
 /**
  * 通过 token 获取当前登录用户
@@ -16,11 +17,13 @@ export async function getUserByToken(request, db) {
     return unauthorized('未登录');
   }
 
+  // 用上海时区时间比较，避免 Cloudflare UTC 导致 token 提前过期
+  const now = formatShanghaiDate(new Date());
   const user = await db.prepare(
     `SELECT id, username, openid, nickname, register_time
      FROM users
-     WHERE token = ? AND token_expire > datetime('now', 'localtime')`
-  ).bind(token).first();
+     WHERE token = ? AND token_expire > ?`
+  ).bind(token, now).first();
 
   if (!user) {
     return unauthorized('登录已过期');
@@ -50,10 +53,8 @@ export function generateToken(seed = '') {
 }
 
 /**
- * 计算 token 过期时间（7天后，本地时间字符串）
+ * 计算 token 过期时间（7天后，上海时区字符串）
  */
 export function tokenExpireString() {
-  const d = new Date(Date.now() + 7 * 24 * 3600 * 1000);
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  return formatShanghaiDate(new Date(Date.now() + 7 * 24 * 3600 * 1000));
 }

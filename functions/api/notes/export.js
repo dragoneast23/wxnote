@@ -11,7 +11,7 @@
 //   { code: 0, msg: 'success', data: { content: '...', fileName: 'xxx.txt' } }
 import { ok } from '../../_shared/response.js';
 import { getUserByToken } from '../../_shared/auth.js';
-import { nowString, generateExportFileName } from '../../_shared/db.js';
+import { nowString, generateExportFileName, formatShanghaiDate } from '../../_shared/db.js';
 
 export async function onRequestGet({ request, env }) {
   const auth = await getUserByToken(request, env.DB);
@@ -46,18 +46,18 @@ export async function onRequestGet({ request, env }) {
   }
 
   // 记录导出动作（24小时后过期，原 PHP 逻辑保留）
-  const expireTime = new Date(Date.now() + 24 * 3600 * 1000);
-  const pad = (n) => String(n).padStart(2, '0');
-  const expireStr = `${expireTime.getFullYear()}-${pad(expireTime.getMonth() + 1)}-${pad(expireTime.getDate())} ${pad(expireTime.getHours())}:${pad(expireTime.getMinutes())}:${pad(expireTime.getSeconds())}`;
+  // 用上海时区时间
+  const now = nowString();
+  const expireStr = formatShanghaiDate(new Date(Date.now() + 24 * 3600 * 1000));
   await env.DB.prepare(
     `INSERT INTO exports (user_id, file_name, create_time, expire_time)
-     VALUES (?, ?, datetime('now', 'localtime'), ?)`
-  ).bind(user.id, fileName, expireStr).run();
+     VALUES (?, ?, ?, ?)`
+  ).bind(user.id, fileName, now, expireStr).run();
 
-  // 清理过期导出记录
+  // 清理过期导出记录（用上海时区时间比较）
   await env.DB.prepare(
-    `DELETE FROM exports WHERE expire_time < datetime('now', 'localtime')`
-  ).run();
+    `DELETE FROM exports WHERE expire_time < ?`
+  ).bind(now).run();
 
   return ok('success', {
     content: txt,
